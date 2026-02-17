@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router";
-import Customer from "./views/Customer";
-import Agent from "./views/Agent";
+import Agent from "@/views/Agent";
+import Customer from "@/views/Customer";
 
 export const AppRouter = () => {
   return (
