@@ -1,8 +1,10 @@
+import { AppRouter } from "./Router";
+
 const App = () => {
   return (
-    <div>
-      <h1 className="text-red-500 font-bold">Hello world!</h1>
-    </div>
+    <>
+      <AppRouter />
+    </>
   );
 };
 
