@@ -1,10 +1,17 @@
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { ChatLauncher, ChatSheet, CustomerChatWidget } from "./components";
 
 const CustomerPage = () => {
+  const [open, setOpen] = useState(false);
+
   return (
-    <div>
-      <Button>Click me</Button>
-    </div>
+    <>
+      <ChatSheet open={open} onOpenChange={setOpen}>
+        <CustomerChatWidget />
+      </ChatSheet>
+
+      <ChatLauncher onClick={() => setOpen(true)} />
+    </>
   );
 };
 
