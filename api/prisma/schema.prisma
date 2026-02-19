@@ -8,7 +8,44 @@ datasource db {
 }
 
 model Agent {
-  id String @id @default(dbgenerated("gen_random_uuid()"))
-  name String
-  status Boolean
+  id        String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  status    Boolean
+
+  conversations Conversation[] @relation("AgentConversations")
+}
+
+model Conversation {
+  id              String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId       String              @db.Uuid
+  status          ConversationStatus
+  assignedAgentId String?             @db.Uuid
+  createdAt       DateTime            @default(now())
+  closedAt        DateTime?
+
+  assignedAgent   Agent?              @relation("AgentConversations", fields: [assignedAgentId], references: [id])
+  messages        Message[]
+}
+
+model Message {
+  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  conversationId  String        @db.Uuid
+  sender          MessageSender
+  content         String
+  createdAt       DateTime      @default(now())
+
+  conversation    Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+enum ConversationStatus {
+  AUTOMATED
+  AGENT
+  CLOSED
+}
+
+enum MessageSender {
+  USER
+  BOT
+  AGENT
+  SYSTEM
 }
