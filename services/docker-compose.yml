@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres
+    ports:
+      - "4000:5432"
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_USER: ecommerce_chat_system
+      POSTGRES_PASSWORD: ecommerce_chat_system
+      POSTGRES_DB: ecommerce_chat_system
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+volumes:
+  postgres_data:
