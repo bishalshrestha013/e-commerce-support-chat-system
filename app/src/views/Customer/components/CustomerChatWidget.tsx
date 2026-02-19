@@ -1,7 +1,8 @@
-import { BOT_QUESTIONS } from "@/constants";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { BOT_QUESTIONS } from "@/constants";
 
 type ChatStatus = "AUTOMATED" | "AGENT" | "CLOSED";
 
@@ -14,23 +15,16 @@ type Message = {
 export const CustomerChatWidget = () => {
   const [status, setStatus] = useState<ChatStatus>("AUTOMATED");
   const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
 
-  const handleBotClick = (id: string) => {
+  const handleBotQuestion = (id: string) => {
     const bot = BOT_QUESTIONS.find((q) => q.id === id);
     if (!bot) return;
 
     setMessages((prev) => [
       ...prev,
-      {
-        id: crypto.randomUUID(),
-        sender: "USER",
-        content: bot.question,
-      },
-      {
-        id: crypto.randomUUID(),
-        sender: "BOT",
-        content: bot.answer,
-      },
+      { id: crypto.randomUUID(), sender: "USER", content: bot.question },
+      { id: crypto.randomUUID(), sender: "BOT", content: bot.answer },
     ]);
   };
 
@@ -48,17 +42,38 @@ export const CustomerChatWidget = () => {
     ]);
   };
 
+  const sendMessage = () => {
+    if (!input.trim()) return;
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        sender: "USER",
+        content: input,
+      },
+    ]);
+
+    setInput("");
+    // Later: emit socket event
+  };
+
   return (
     <>
+      {/* Messages */}
       <ScrollArea className="flex-1 p-4 text-sm">
-        {messages.map((m) => (
-          <div key={m.id}>
-            <strong>{m.sender}:</strong> {m.content}
-          </div>
-        ))}
+        <div className="space-y-2">
+          {messages.map((m) => (
+            <div key={m.id}>
+              <strong>{m.sender}:</strong> {m.content}
+            </div>
+          ))}
+        </div>
       </ScrollArea>
 
+      {/* Footer */}
       <div className="border-t p-4 space-y-2">
+        {/* BOT MODE */}
         {status === "AUTOMATED" && (
           <>
             {BOT_QUESTIONS.map((q) => (
@@ -66,24 +81,32 @@ export const CustomerChatWidget = () => {
                 key={q.id}
                 variant="outline"
                 className="w-full"
-                onClick={() => handleBotClick(q.id)}
+                onClick={() => handleBotQuestion(q.id)}
               >
                 {q.question}
               </Button>
             ))}
 
-            <Button variant="outline" className="w-full" onClick={talkToAgent}>
+            <Button className="w-full" onClick={talkToAgent}>
               Talk to agent
             </Button>
           </>
         )}
 
+        {/* AGENT MODE */}
         {status === "AGENT" && (
-          <p className="text-xs text-muted-foreground">
-            You are chatting with a live agent.
-          </p>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Type your message..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+            />
+            <Button onClick={sendMessage}>Send</Button>
+          </div>
         )}
 
+        {/* CLOSED MODE */}
         {status === "CLOSED" && (
           <p className="text-xs text-muted-foreground">
             This conversation has ended.
